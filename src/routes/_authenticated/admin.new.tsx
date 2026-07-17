@@ -50,7 +50,10 @@ function NewPost() {
             })
             .select("slug")
             .single();
-          if (error) return toast.error(error.message);
+          if (error) {
+            toast.error(error.message);
+            return;
+          }
           toast.success("Published");
           navigate({ to: "/posts/$slug", params: { slug: data.slug } });
         }}

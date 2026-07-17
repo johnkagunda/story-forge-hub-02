@@ -31,17 +31,18 @@ function EditPost() {
   });
 
   if (!isAdmin || postQ.isLoading) return <p className="text-center py-20 text-muted-foreground">Loading…</p>;
-  if (!postQ.data) return <p className="text-center py-20">Post not found.</p>;
+  const post = postQ.data;
+  if (!post) return <p className="text-center py-20">Post not found.</p>;
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-12">
       <h1 className="font-serif text-4xl mb-8">Edit post</h1>
       <PostForm
         initial={{
-          title: postQ.data.title,
-          excerpt: postQ.data.excerpt ?? "",
-          cover_image_url: postQ.data.cover_image_url ?? "",
-          content: postQ.data.content,
+          title: post.title,
+          excerpt: post.excerpt ?? "",
+          cover_image_url: post.cover_image_url ?? "",
+          content: post.content,
         }}
         submitLabel="Save changes"
         onSubmit={async (values) => {
@@ -54,9 +55,12 @@ function EditPost() {
               content: values.content,
             })
             .eq("id", id);
-          if (error) return toast.error(error.message);
+          if (error) {
+            toast.error(error.message);
+            return;
+          }
           toast.success("Saved");
-          navigate({ to: "/posts/$slug", params: { slug: postQ.data.slug } });
+          navigate({ to: "/posts/$slug", params: { slug: post.slug } });
         }}
       />
     </div>
