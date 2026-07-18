@@ -37,11 +37,24 @@ LANGUAGE sql
 STABLE
 SECURITY DEFINER
 SET search_path = public
-AS $$
+AS $
   SELECT EXISTS (
     SELECT 1 FROM public.user_roles WHERE user_id = _user_id AND role = _role
   )
-$$;
+$;
+
+REVOKE EXECUTE ON FUNCTION public.has_role(uuid, public.app_role) FROM PUBLIC, anon;
+
+-- updated_at trigger
+CREATE OR REPLACE FUNCTION public.set_updated_at()
+RETURNS trigger LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $
+BEGIN NEW.updated_at = now(); RETURN NEW; END;
+$;
+
+REVOKE EXECUTE ON FUNCTION public.set_updated_at() FROM PUBLIC, anon, authenticated;
 
 -- Trigger: auto-create profile + grant admin role to configured email
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -49,7 +62,7 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $$
+AS $
 BEGIN
   INSERT INTO public.profiles (id, display_name, avatar_url)
   VALUES (
@@ -68,11 +81,9 @@ BEGIN
 
   RETURN NEW;
 END;
-$$;
+$;
 
-CREATE TRIGGER on_auth_user_created
-AFTER INSERT ON auth.users
-FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
+REVOKE EXECUTE ON FUNCTION public.handle_new_user() FROM PUBLIC, anon, authenticated;
 
 -- Also grant admin when a matching user gets their email confirmed later
 CREATE OR REPLACE FUNCTION public.grant_admin_on_confirm()
@@ -80,7 +91,7 @@ RETURNS trigger
 LANGUAGE plpgsql
 SECURITY DEFINER
 SET search_path = public
-AS $$
+AS $
 BEGIN
   IF NEW.email_confirmed_at IS NOT NULL AND lower(NEW.email) = 'jkagunda317@gmail.com' THEN
     INSERT INTO public.user_roles (user_id, role) VALUES (NEW.id, 'admin')
@@ -88,7 +99,13 @@ BEGIN
   END IF;
   RETURN NEW;
 END;
-$$;
+$;
+
+REVOKE EXECUTE ON FUNCTION public.grant_admin_on_confirm() FROM PUBLIC, anon, authenticated;
+
+CREATE TRIGGER on_auth_user_created
+AFTER INSERT ON auth.users
+FOR EACH ROW EXECUTE FUNCTION public.handle_new_user();
 
 CREATE TRIGGER on_auth_user_confirmed_grant_admin
 AFTER UPDATE OF email_confirmed_at ON auth.users
@@ -152,12 +169,7 @@ CREATE POLICY "Likes are viewable by everyone" ON public.likes FOR SELECT USING 
 CREATE POLICY "Users can like as themselves" ON public.likes FOR INSERT TO authenticated WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can unlike own likes" ON public.likes FOR DELETE TO authenticated USING (auth.uid() = user_id);
 
--- updated_at trigger
-CREATE OR REPLACE FUNCTION public.set_updated_at()
-RETURNS trigger LANGUAGE plpgsql AS $$
-BEGIN NEW.updated_at = now(); RETURN NEW; END;
-$$;
-
+-- updated_at triggers
 CREATE TRIGGER posts_set_updated_at BEFORE UPDATE ON public.posts FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER comments_set_updated_at BEFORE UPDATE ON public.comments FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();
 CREATE TRIGGER profiles_set_updated_at BEFORE UPDATE ON public.profiles FOR EACH ROW EXECUTE FUNCTION public.set_updated_at();

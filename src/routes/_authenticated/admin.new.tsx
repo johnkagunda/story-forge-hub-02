@@ -1,9 +1,9 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { PostForm } from "@/components/PostForm";
 import { useIsAdmin, useSession } from "@/lib/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/admin/new")({
   component: NewPost,
@@ -21,14 +21,18 @@ function slugify(s: string) {
 
 function NewPost() {
   const navigate = useNavigate();
-  const { user } = useSession();
-  const { data: isAdmin, isLoading } = useIsAdmin();
+  const { user, loading: sessionLoading } = useSession();
+  const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
+
+  const isLoading = sessionLoading || adminLoading;
 
   useEffect(() => {
     if (!isLoading && !isAdmin) navigate({ to: "/", replace: true });
   }, [isAdmin, isLoading, navigate]);
 
-  if (!isAdmin) return <p className="text-center py-20 text-muted-foreground">Checking…</p>;
+  if (isLoading || !isAdmin) {
+    return <p className="text-center py-20 text-muted-foreground">Checking…</p>;
+  }
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-12">
@@ -44,7 +48,7 @@ function NewPost() {
               title: values.title,
               slug,
               excerpt: values.excerpt || null,
-              cover_image_url: values.cover_image_url || null,
+              cover_image_url: values.cover_media_url || null,
               content: values.content,
               published: true,
             })

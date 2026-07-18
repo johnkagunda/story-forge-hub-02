@@ -20,10 +20,10 @@ export function useSession() {
 }
 
 export function useIsAdmin() {
-  const { user } = useSession();
+  const { user, loading: sessionLoading } = useSession();
   return useQuery({
     queryKey: ["is-admin", user?.id],
-    enabled: !!user,
+    enabled: !sessionLoading && !!user,
     queryFn: async () => {
       if (!user) return false;
       const { data, error } = await supabase

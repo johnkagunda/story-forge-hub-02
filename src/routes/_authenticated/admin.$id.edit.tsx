@@ -1,10 +1,10 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
+import { useEffect } from "react";
 import { PostForm } from "@/components/PostForm";
-import { useIsAdmin } from "@/lib/useSession";
+import { useIsAdmin, useSession } from "@/lib/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
-import { useEffect } from "react";
 
 export const Route = createFileRoute("/_authenticated/admin/$id/edit")({
   component: EditPost,
@@ -14,11 +14,14 @@ export const Route = createFileRoute("/_authenticated/admin/$id/edit")({
 function EditPost() {
   const { id } = Route.useParams();
   const navigate = useNavigate();
+  const { loading: sessionLoading } = useSession();
   const { data: isAdmin, isLoading: adminLoading } = useIsAdmin();
 
+  const isLoading = sessionLoading || adminLoading;
+
   useEffect(() => {
-    if (!adminLoading && !isAdmin) navigate({ to: "/", replace: true });
-  }, [isAdmin, adminLoading, navigate]);
+    if (!isLoading && !isAdmin) navigate({ to: "/", replace: true });
+  }, [isAdmin, isLoading, navigate]);
 
   const postQ = useQuery({
     queryKey: ["post-edit", id],
@@ -30,7 +33,9 @@ function EditPost() {
     },
   });
 
-  if (!isAdmin || postQ.isLoading) return <p className="text-center py-20 text-muted-foreground">Loading…</p>;
+  if (isLoading || !isAdmin) return <p className="text-center py-20 text-muted-foreground">Loading…</p>;
+  if (postQ.isLoading) return <p className="text-center py-20 text-muted-foreground">Loading…</p>;
+
   const post = postQ.data;
   if (!post) return <p className="text-center py-20">Post not found.</p>;
 
@@ -41,7 +46,7 @@ function EditPost() {
         initial={{
           title: post.title,
           excerpt: post.excerpt ?? "",
-          cover_image_url: post.cover_image_url ?? "",
+          cover_media_url: post.cover_image_url ?? "",
           content: post.content,
         }}
         submitLabel="Save changes"
@@ -51,7 +56,7 @@ function EditPost() {
             .update({
               title: values.title,
               excerpt: values.excerpt || null,
-              cover_image_url: values.cover_image_url || null,
+              cover_image_url: values.cover_media_url || null,
               content: values.content,
             })
             .eq("id", id);

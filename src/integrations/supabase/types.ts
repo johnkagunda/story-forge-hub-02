@@ -49,28 +49,31 @@ export type Database = {
           },
         ]
       }
-      likes: {
+      votes: {
         Row: {
           created_at: string
           id: string
           post_id: string
           user_id: string
+          vote: Database["public"]["Enums"]["vote_type"]
         }
         Insert: {
           created_at?: string
           id?: string
           post_id: string
           user_id: string
+          vote: Database["public"]["Enums"]["vote_type"]
         }
         Update: {
           created_at?: string
           id?: string
           post_id?: string
           user_id?: string
+          vote?: Database["public"]["Enums"]["vote_type"]
         }
         Relationships: [
           {
-            foreignKeyName: "likes_post_id_fkey"
+            foreignKeyName: "votes_post_id_fkey"
             columns: ["post_id"]
             isOneToOne: false
             referencedRelation: "posts"
@@ -177,6 +180,7 @@ export type Database = {
     }
     Enums: {
       app_role: "admin" | "user"
+      vote_type: "up" | "down"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -305,6 +309,7 @@ export const Constants = {
   public: {
     Enums: {
       app_role: ["admin", "user"],
+      vote_type: ["up", "down"],
     },
   },
 } as const

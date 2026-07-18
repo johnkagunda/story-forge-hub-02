@@ -1,7 +1,6 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
 import { useEffect, useState } from "react";
 import { supabase } from "@/integrations/supabase/client";
-import { lovable } from "@/integrations/lovable";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -59,22 +58,25 @@ function AuthPage() {
   }
 
   async function handleGoogle() {
-    const result = await lovable.auth.signInWithOAuth("google", {
-      redirect_uri: window.location.origin,
+    const { error } = await supabase.auth.signInWithOAuth({
+      provider: "google",
+      options: { redirectTo: window.location.origin },
     });
-    if (result.error) toast.error(result.error.message);
+    if (error) toast.error(error.message);
   }
 
   return (
-    <div className="max-w-md mx-auto px-5 py-16">
+    <div className="max-w-sm mx-auto px-5 py-12">
       <div className="text-center mb-8">
-        <h1 className="font-serif text-4xl">Welcome</h1>
-        <p className="mt-2 text-muted-foreground">
-          Sign in to leave a comment or a heart.
+        <p className="font-serif text-3xl font-bold">
+          Warm<span className="text-primary">Notes</span>
+        </p>
+        <p className="mt-2 text-sm text-muted-foreground">
+          Sign in to comment and react.
         </p>
       </div>
 
-      <div className="rounded-3xl border border-border bg-card p-6 shadow-sm">
+      <div className="rounded-2xl border border-border bg-card p-6">
         <Button
           type="button"
           variant="outline"

@@ -1,7 +1,6 @@
 import { Link, useNavigate } from "@tanstack/react-router";
 import { useSession, useIsAdmin } from "@/lib/useSession";
 import { supabase } from "@/integrations/supabase/client";
-import { Button } from "@/components/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -11,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { PenLine, LogOut, User as UserIcon } from "lucide-react";
+import { LogOut, Search } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function Header() {
@@ -30,54 +29,53 @@ export function Header() {
   const initial = user?.email?.[0]?.toUpperCase() ?? "?";
 
   return (
-    <header className="border-b border-border/60 bg-background/80 backdrop-blur sticky top-0 z-40">
-      <div className="max-w-4xl mx-auto px-5 h-16 flex items-center justify-between">
-        <Link to="/" className="flex items-center gap-2 group">
-          <span className="h-8 w-8 rounded-full bg-primary flex items-center justify-center text-primary-foreground font-serif text-lg">
-            W
-          </span>
-          <span className="font-serif text-xl tracking-tight group-hover:text-primary transition-colors">
-            Warm Notes
-          </span>
+    <header className="sticky top-0 z-40 border-b border-border bg-background/95 backdrop-blur-md">
+      <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
+        {/* Logo */}
+        <Link to="/" className="font-serif text-xl font-bold tracking-tight text-foreground">
+          Warm<span className="text-primary">Notes</span>
         </Link>
-        <nav className="flex items-center gap-2">
-          {isAdmin && (
-            <Button asChild variant="ghost" size="sm">
-              <Link to="/admin/new">
-                <PenLine className="h-4 w-4 mr-1.5" /> New post
-              </Link>
-            </Button>
-          )}
+
+        {/* Right actions */}
+        <div className="flex items-center gap-3">
+          <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search">
+            <Search className="h-5 w-5" />
+          </button>
+
           {loading ? null : user ? (
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <button className="rounded-full ring-offset-2 focus:outline-none focus:ring-2 focus:ring-ring">
-                  <Avatar className="h-9 w-9 border border-border">
+                <button className="rounded-full ring-2 ring-border focus:outline-none focus:ring-primary transition-all">
+                  <Avatar className="h-8 w-8">
                     <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback className="bg-secondary text-secondary-foreground">
+                    <AvatarFallback className="bg-primary text-white text-xs font-bold">
                       {initial}
                     </AvatarFallback>
                   </Avatar>
                 </button>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel className="truncate">{user.email}</DropdownMenuLabel>
+              <DropdownMenuContent align="end" className="w-52 bg-card border-border">
+                <DropdownMenuLabel className="truncate text-xs text-muted-foreground font-normal">
+                  {user.email}
+                </DropdownMenuLabel>
+                {isAdmin && (
+                  <DropdownMenuLabel className="text-xs text-primary pt-0">Admin</DropdownMenuLabel>
+                )}
                 <DropdownMenuSeparator />
-                <DropdownMenuItem disabled>
-                  <UserIcon className="h-4 w-4 mr-2" />
-                  {isAdmin ? "Admin" : "Reader"}
-                </DropdownMenuItem>
-                <DropdownMenuItem onClick={signOut}>
+                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
                   <LogOut className="h-4 w-4 mr-2" /> Sign out
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
           ) : (
-            <Button asChild size="sm" variant="default">
-              <Link to="/auth">Sign in</Link>
-            </Button>
+            <Link
+              to="/auth"
+              className="text-sm font-semibold text-primary hover:opacity-80 transition-opacity"
+            >
+              Sign in
+            </Link>
           )}
-        </nav>
+        </div>
       </div>
     </header>
   );
