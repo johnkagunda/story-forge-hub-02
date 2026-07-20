@@ -5,6 +5,7 @@ import { useIsAdmin, useSession } from "@/lib/useSession";
 import { supabase } from "@/integrations/supabase/client";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { Eye } from "lucide-react";
 
 export const Route = createFileRoute("/_authenticated/admin/$id/edit")({
   component: EditPost,
@@ -41,7 +42,14 @@ function EditPost() {
 
   return (
     <div className="max-w-2xl mx-auto px-5 py-12">
-      <h1 className="font-serif text-4xl mb-8">Edit post</h1>
+      <h1 className="font-serif text-4xl mb-2">Edit post</h1>
+
+      {/* View count — admin only, not exposed publicly */}
+      <div className="flex items-center gap-1.5 text-sm text-muted-foreground mb-8">
+        <Eye className="h-4 w-4" />
+        <span>{post.views ?? 0} {post.views === 1 ? "view" : "views"}</span>
+      </div>
+
       <PostForm
         initial={{
           title: post.title,

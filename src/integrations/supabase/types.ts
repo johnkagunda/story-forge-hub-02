@@ -93,6 +93,7 @@ export type Database = {
           slug: string
           title: string
           updated_at: string
+          views: number
         }
         Insert: {
           author_id: string
@@ -105,6 +106,7 @@ export type Database = {
           slug: string
           title: string
           updated_at?: string
+          views?: number
         }
         Update: {
           author_id?: string
@@ -117,8 +119,38 @@ export type Database = {
           slug?: string
           title?: string
           updated_at?: string
+          views?: number
         }
         Relationships: []
+      }
+      post_views: {
+        Row: {
+          id: string
+          post_id: string
+          session_id: string | null
+          created_at: string
+        }
+        Insert: {
+          id?: string
+          post_id: string
+          session_id?: string | null
+          created_at?: string
+        }
+        Update: {
+          id?: string
+          post_id?: string
+          session_id?: string | null
+          created_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "post_views_post_id_fkey"
+            columns: ["post_id"]
+            isOneToOne: false
+            referencedRelation: "posts"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       profiles: {
         Row: {
@@ -174,6 +206,13 @@ export type Database = {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]
           _user_id: string
+        }
+        Returns: boolean
+      }
+      increment_post_views: {
+        Args: {
+          post_id: string
+          visitor_id: string
         }
         Returns: boolean
       }

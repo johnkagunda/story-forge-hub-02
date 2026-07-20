@@ -14,7 +14,9 @@ import { Route as AuthRouteImport } from './routes/auth'
 import { Route as AuthenticatedRouteRouteImport } from './routes/_authenticated/route'
 import { Route as IndexRouteImport } from './routes/index'
 import { Route as PostsSlugRouteImport } from './routes/posts.$slug'
+import { Route as AuthenticatedAdminIndexRouteImport } from './routes/_authenticated/admin.index'
 import { Route as AuthenticatedAdminNewRouteImport } from './routes/_authenticated/admin.new'
+import { Route as ApiBlogsSlugViewRouteImport } from './routes/api.blogs.$slug.view'
 import { Route as AuthenticatedAdminIdEditRouteImport } from './routes/_authenticated/admin.$id.edit'
 
 const SitemapDotxmlRoute = SitemapDotxmlRouteImport.update({
@@ -41,10 +43,20 @@ const PostsSlugRoute = PostsSlugRouteImport.update({
   path: '/posts/$slug',
   getParentRoute: () => rootRouteImport,
 } as any)
+const AuthenticatedAdminIndexRoute = AuthenticatedAdminIndexRouteImport.update({
+  id: '/admin/',
+  path: '/admin/',
+  getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
 const AuthenticatedAdminNewRoute = AuthenticatedAdminNewRouteImport.update({
   id: '/admin/new',
   path: '/admin/new',
   getParentRoute: () => AuthenticatedRouteRoute,
+} as any)
+const ApiBlogsSlugViewRoute = ApiBlogsSlugViewRouteImport.update({
+  id: '/api/blogs/$slug/view',
+  path: '/api/blogs/$slug/view',
+  getParentRoute: () => rootRouteImport,
 } as any)
 const AuthenticatedAdminIdEditRoute =
   AuthenticatedAdminIdEditRouteImport.update({
@@ -59,7 +71,9 @@ export interface FileRoutesByFullPath {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/admin/new': typeof AuthenticatedAdminNewRoute
+  '/admin/': typeof AuthenticatedAdminIndexRoute
   '/admin/$id/edit': typeof AuthenticatedAdminIdEditRoute
+  '/api/blogs/$slug/view': typeof ApiBlogsSlugViewRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -67,7 +81,9 @@ export interface FileRoutesByTo {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/admin/new': typeof AuthenticatedAdminNewRoute
+  '/admin': typeof AuthenticatedAdminIndexRoute
   '/admin/$id/edit': typeof AuthenticatedAdminIdEditRoute
+  '/api/blogs/$slug/view': typeof ApiBlogsSlugViewRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -77,7 +93,9 @@ export interface FileRoutesById {
   '/sitemap.xml': typeof SitemapDotxmlRoute
   '/posts/$slug': typeof PostsSlugRoute
   '/_authenticated/admin/new': typeof AuthenticatedAdminNewRoute
+  '/_authenticated/admin/': typeof AuthenticatedAdminIndexRoute
   '/_authenticated/admin/$id/edit': typeof AuthenticatedAdminIdEditRoute
+  '/api/blogs/$slug/view': typeof ApiBlogsSlugViewRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -87,7 +105,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/posts/$slug'
     | '/admin/new'
+    | '/admin/'
     | '/admin/$id/edit'
+    | '/api/blogs/$slug/view'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -95,7 +115,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/posts/$slug'
     | '/admin/new'
+    | '/admin'
     | '/admin/$id/edit'
+    | '/api/blogs/$slug/view'
   id:
     | '__root__'
     | '/'
@@ -104,7 +126,9 @@ export interface FileRouteTypes {
     | '/sitemap.xml'
     | '/posts/$slug'
     | '/_authenticated/admin/new'
+    | '/_authenticated/admin/'
     | '/_authenticated/admin/$id/edit'
+    | '/api/blogs/$slug/view'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -113,6 +137,7 @@ export interface RootRouteChildren {
   AuthRoute: typeof AuthRoute
   SitemapDotxmlRoute: typeof SitemapDotxmlRoute
   PostsSlugRoute: typeof PostsSlugRoute
+  ApiBlogsSlugViewRoute: typeof ApiBlogsSlugViewRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -152,12 +177,26 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof PostsSlugRouteImport
       parentRoute: typeof rootRouteImport
     }
+    '/_authenticated/admin/': {
+      id: '/_authenticated/admin/'
+      path: '/admin'
+      fullPath: '/admin/'
+      preLoaderRoute: typeof AuthenticatedAdminIndexRouteImport
+      parentRoute: typeof AuthenticatedRouteRoute
+    }
     '/_authenticated/admin/new': {
       id: '/_authenticated/admin/new'
       path: '/admin/new'
       fullPath: '/admin/new'
       preLoaderRoute: typeof AuthenticatedAdminNewRouteImport
       parentRoute: typeof AuthenticatedRouteRoute
+    }
+    '/api/blogs/$slug/view': {
+      id: '/api/blogs/$slug/view'
+      path: '/api/blogs/$slug/view'
+      fullPath: '/api/blogs/$slug/view'
+      preLoaderRoute: typeof ApiBlogsSlugViewRouteImport
+      parentRoute: typeof rootRouteImport
     }
     '/_authenticated/admin/$id/edit': {
       id: '/_authenticated/admin/$id/edit'
@@ -171,11 +210,13 @@ declare module '@tanstack/react-router' {
 
 interface AuthenticatedRouteRouteChildren {
   AuthenticatedAdminNewRoute: typeof AuthenticatedAdminNewRoute
+  AuthenticatedAdminIndexRoute: typeof AuthenticatedAdminIndexRoute
   AuthenticatedAdminIdEditRoute: typeof AuthenticatedAdminIdEditRoute
 }
 
 const AuthenticatedRouteRouteChildren: AuthenticatedRouteRouteChildren = {
   AuthenticatedAdminNewRoute: AuthenticatedAdminNewRoute,
+  AuthenticatedAdminIndexRoute: AuthenticatedAdminIndexRoute,
   AuthenticatedAdminIdEditRoute: AuthenticatedAdminIdEditRoute,
 }
 
@@ -188,6 +229,7 @@ const rootRouteChildren: RootRouteChildren = {
   AuthRoute: AuthRoute,
   SitemapDotxmlRoute: SitemapDotxmlRoute,
   PostsSlugRoute: PostsSlugRoute,
+  ApiBlogsSlugViewRoute: ApiBlogsSlugViewRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

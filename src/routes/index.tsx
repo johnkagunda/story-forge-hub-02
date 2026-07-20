@@ -1,13 +1,20 @@
-import { createFileRoute, Link } from "@tanstack/react-router";
+import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { formatDistanceToNow } from "date-fns";
-import { ArrowUp, ArrowDown, Share2, Bookmark } from "lucide-react";
+import { ArrowUp, ArrowDown, Share2, Bookmark, Search, X } from "lucide-react";
 import { useSession } from "@/lib/useSession";
-import { useNavigate } from "@tanstack/react-router";
 import { toast } from "sonner";
+import { useState, useCallback, useEffect, useRef } from "react";
+import { Input } from "@/components/ui/input";
+import { z } from "zod";
+
+const searchSchema = z.object({
+  q: z.string().optional(),
+});
 
 export const Route = createFileRoute("/")({
+  validateSearch: searchSchema,
   component: Home,
   head: () => ({
     meta: [
@@ -220,15 +227,85 @@ function PostCard({ post }: { post: PostRow }) {
   );
 }
 
+function SearchBar() {
+  const { q } = Route.useSearch();
+  const navigate = useNavigate();
+  const [localValue, setLocalValue] = useState(q ?? "");
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Sync URL search param to local state when navigated externally
+  useEffect(() => {
+    setLocalValue(q ?? "");
+  }, [q]);
+
+  // Debounce: update URL search param 300ms after user stops typing
+  useEffect(() => {
+    const timer = setTimeout(() => {
+      const trimmed = localValue.trim();
+      if (trimmed) {
+        navigate({ to: "/", search: { q: trimmed }, replace: true });
+      } else if (q !== undefined) {
+        navigate({ to: "/", search: { q: undefined }, replace: true });
+      }
+    }, 300);
+    return () => clearTimeout(timer);
+  }, [localValue, navigate, q]);
+
+  // Auto-focus when navigated with ?q=
+  useEffect(() => {
+    if (q && inputRef.current) {
+      inputRef.current.focus();
+    }
+  }, [q]);
+
+  const handleClear = useCallback(() => {
+    setLocalValue("");
+    navigate({ to: "/", search: { q: undefined }, replace: true });
+    inputRef.current?.focus();
+  }, [navigate]);
+
+  return (
+    <div className="relative px-4 pt-4 pb-2">
+      <div className="relative">
+        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground pointer-events-none" />
+        <Input
+          ref={inputRef}
+          value={localValue}
+          onChange={(e) => setLocalValue(e.target.value)}
+          placeholder="Search stories..."
+          className="pl-9 pr-9 h-10 rounded-xl bg-card border-border text-sm"
+        />
+        {localValue && (
+          <button
+            onClick={handleClear}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Clear search"
+          >
+            <X className="h-4 w-4" />
+          </button>
+        )}
+      </div>
+    </div>
+  );
+}
+
 function Home() {
+  const { q } = Route.useSearch();
   const { data, isLoading, error } = useQuery({
-    queryKey: ["posts", "list"],
+    queryKey: ["posts", "list", q],
     queryFn: async () => {
-      const { data, error } = await supabase
+      let query = supabase
         .from("posts")
         .select("id, slug, title, excerpt, cover_image_url, created_at, author_id")
-        .eq("published", true)
-        .order("created_at", { ascending: false });
+        .eq("published", true);
+
+      if (q) {
+        query = query.or(
+          `title.ilike.%${q}%,excerpt.ilike.%${q}%,content.ilike.%${q}%`
+        );
+      }
+
+      const { data, error } = await query.order("created_at", { ascending: false });
       if (error) throw error;
       return data as PostRow[];
     },
@@ -236,6 +313,8 @@ function Home() {
 
   return (
     <div className="max-w-lg mx-auto">
+      <SearchBar />
+
       {isLoading && (
         <div>
           {[1, 2, 3].map((i) => (
@@ -255,11 +334,25 @@ function Home() {
         <div className="text-center py-20 text-destructive text-sm">Failed to load posts.</div>
       )}
 
-      {data?.length === 0 && (
+      {data?.length === 0 && !isLoading && (
         <div className="text-center py-24 px-6">
-          <div className="text-4xl mb-4">✍️</div>
-          <p className="font-serif text-xl text-foreground">No posts yet</p>
-          <p className="mt-2 text-sm text-muted-foreground">The first story is coming soon.</p>
+          <div className="text-4xl mb-4">{q ? "🔍" : "✍️"}</div>
+          <p className="font-serif text-xl text-foreground">
+            {q ? "No matching stories" : "No posts yet"}
+          </p>
+          <p className="mt-2 text-sm text-muted-foreground">
+            {q
+              ? `We couldn't find anything for "${q}". Try a different keyword.`
+              : "The first story is coming soon."}
+          </p>
+        </div>
+      )}
+
+      {q && data && data.length > 0 && (
+        <div className="px-4 py-2">
+          <p className="text-xs text-muted-foreground">
+            Found {data.length} {data.length === 1 ? "story" : "stories"} for "{q}"
+          </p>
         </div>
       )}
 

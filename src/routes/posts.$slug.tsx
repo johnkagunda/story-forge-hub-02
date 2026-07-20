@@ -2,6 +2,7 @@ import { createFileRoute, Link, useNavigate } from "@tanstack/react-router";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession, useIsAdmin } from "@/lib/useSession";
+import { useBlogViewTracker } from "@/lib/useBlogViewTracker";
 import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
@@ -46,6 +47,9 @@ function PostPage() {
   const qc = useQueryClient();
   const navigate = useNavigate();
   const [commentText, setCommentText] = useState("");
+
+  // Track unique blog view (anonymous, fires once on mount)
+  useBlogViewTracker(slug);
 
   const postQ = useQuery({
     queryKey: ["post", slug],

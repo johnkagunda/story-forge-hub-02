@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LogOut, Search } from "lucide-react";
+import { LayoutDashboard, LogOut, Search } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function Header() {
@@ -38,7 +38,11 @@ export function Header() {
 
         {/* Right actions */}
         <div className="flex items-center gap-3">
-          <button className="text-muted-foreground hover:text-foreground transition-colors" aria-label="Search">
+          <button
+            onClick={() => navigate({ to: "/", search: { q: "" } })}
+            className="text-muted-foreground hover:text-foreground transition-colors"
+            aria-label="Search"
+          >
             <Search className="h-5 w-5" />
           </button>
 
@@ -59,7 +63,12 @@ export function Header() {
                   {user.email}
                 </DropdownMenuLabel>
                 {isAdmin && (
-                  <DropdownMenuLabel className="text-xs text-primary pt-0">Admin</DropdownMenuLabel>
+                  <>
+                    <DropdownMenuLabel className="text-xs text-primary pt-0">Admin</DropdownMenuLabel>
+                    <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>
+                      <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
+                    </DropdownMenuItem>
+                  </>
                 )}
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
