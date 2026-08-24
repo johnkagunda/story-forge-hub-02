@@ -9,6 +9,8 @@ RUN npm ci --no-audit --no-fund
 
 COPY . .
 
+ENV NITRO_PRESET=node-server
+
 RUN npm run build
 
 
@@ -19,10 +21,10 @@ WORKDIR /app
 
 COPY --from=builder /app/.output ./.output
 
-EXPOSE 8080
-
 ENV NODE_ENV=production
 ENV PORT=8080
 ENV HOST=0.0.0.0
+
+EXPOSE 8080
 
 CMD ["node", ".output/server/index.mjs"]
