@@ -1,4 +1,4 @@
-# Stage 1: Build frontend
+# Stage 1: Build React frontend
 FROM node:24-alpine AS frontend-builder
 
 WORKDIR /app
@@ -7,21 +7,19 @@ COPY package.json package-lock.json ./
 
 RUN npm ci --no-audit --no-fund
 
-COPY frontend/ ./frontend/
+COPY . .
 
-WORKDIR /app/frontend
-
-RUN npx vite build
+RUN npm run build
 
 
-# Stage 2: Frontend runtime
+# Stage 2: Production runtime
 FROM node:24-alpine
 
 WORKDIR /app
 
 RUN npm install -g serve
 
-COPY --from=frontend-builder /app/frontend/dist ./dist
+COPY --from=frontend-builder /app/dist ./dist
 
 EXPOSE 8080
 
