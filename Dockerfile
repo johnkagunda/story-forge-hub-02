@@ -1,5 +1,5 @@
-# Stage 1: Build React frontend
-FROM node:24-alpine AS frontend-builder
+# Stage 1: Build
+FROM node:24-alpine AS builder
 
 WORKDIR /app
 
@@ -12,18 +12,17 @@ COPY . .
 RUN npm run build
 
 
-# Stage 2: Production runtime
+# Stage 2: Production
 FROM node:24-alpine
 
 WORKDIR /app
 
-RUN npm install -g serve
-
-COPY --from=frontend-builder /app/dist ./dist
+COPY --from=builder /app/.output ./.output
 
 EXPOSE 8080
 
 ENV NODE_ENV=production
 ENV PORT=8080
+ENV HOST=0.0.0.0
 
-CMD ["serve", "-s", "dist", "-l", "8080"]
+CMD ["node", ".output/server/index.mjs"]
