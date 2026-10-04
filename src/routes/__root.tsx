@@ -12,6 +12,7 @@ import { useEffect, type ReactNode } from "react";
 import appCss from "../styles.css?url";
 import { reportLovableError } from "../lib/lovable-error-reporting";
 import { Header } from "../components/Header";
+import { Footer } from "../components/Footer";
 import { Toaster } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { useSession, useIsAdmin } from "@/lib/useSession";
@@ -60,7 +61,7 @@ export const Route = createRootRouteWithContext<{ queryClient: QueryClient }>()(
     meta: [
       { charSet: "utf-8" },
       { name: "viewport", content: "width=device-width, initial-scale=1" },
-      { title: "Warm Notes" },
+      { title: "SoshoBird" },
       { name: "description", content: "Personal essays, notes, and stories." },
       { name: "theme-color", content: "#0a0a0a" },
     ],
@@ -111,8 +112,8 @@ function BottomNav() {
         </Link>
 
         <Link
-          to="/"
-          className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors px-3 py-1"
+          to="/explore"
+          className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors px-3 py-1 [&.active]:text-primary"
         >
           <Compass className="h-5 w-5" />
           <span className="text-[10px]">Explore</span>
@@ -136,7 +137,7 @@ function BottomNav() {
         </Link>
 
         <Link
-          to={user ? "/" : "/auth"}
+          to={user ? "/profile" : "/auth"}
           className="flex flex-col items-center gap-0.5 text-muted-foreground hover:text-foreground transition-colors px-3 py-1 [&.active]:text-primary"
         >
           <User className="h-5 w-5" />
@@ -167,6 +168,7 @@ function RootComponent() {
         <main className="flex-1">
           <Outlet />
         </main>
+        <Footer />
       </div>
       <BottomNav />
       <Toaster position="top-center" richColors theme="dark" />

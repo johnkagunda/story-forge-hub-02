@@ -18,7 +18,7 @@ export const Route = createFileRoute("/")({
   component: Home,
   head: () => ({
     meta: [
-      { title: "Warm Notes" },
+      { title: "SoshoBird" },
       { name: "description", content: "Personal essays, notes, and stories." },
     ],
   }),
@@ -167,7 +167,7 @@ function PostCard({ post }: { post: PostRow }) {
               <div className="h-6 w-6 rounded-full bg-primary flex items-center justify-center text-[10px] font-bold text-white shrink-0">
                 W
               </div>
-              <span className="text-xs font-semibold text-foreground">Warm Notes</span>
+              <span className="text-xs font-semibold text-foreground">SoshoBird</span>
               <span className="text-xs text-muted-foreground">·</span>
               <span className="text-xs text-muted-foreground">
                 {formatDistanceToNow(new Date(post.created_at), { addSuffix: false })} ago

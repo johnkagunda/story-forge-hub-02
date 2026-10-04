@@ -10,7 +10,7 @@ import {
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-import { LayoutDashboard, LogOut, Search } from "lucide-react";
+import { LayoutDashboard, LogOut, Search, User } from "lucide-react";
 import { useQueryClient } from "@tanstack/react-query";
 
 export function Header() {
@@ -33,7 +33,7 @@ export function Header() {
       <div className="max-w-lg mx-auto px-4 h-14 flex items-center justify-between">
         {/* Logo */}
         <Link to="/" className="font-serif text-xl font-bold tracking-tight text-foreground">
-          Warm<span className="text-primary">Notes</span>
+          Sosho<span className="text-primary">Bird</span>
         </Link>
 
         {/* Right actions */}
@@ -47,35 +47,40 @@ export function Header() {
           </button>
 
           {loading ? null : user ? (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="rounded-full ring-2 ring-border focus:outline-none focus:ring-primary transition-all">
-                  <Avatar className="h-8 w-8">
-                    <AvatarImage src={user.user_metadata?.avatar_url} />
-                    <AvatarFallback className="bg-primary text-white text-xs font-bold">
-                      {initial}
-                    </AvatarFallback>
-                  </Avatar>
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 bg-card border-border">
-                <DropdownMenuLabel className="truncate text-xs text-muted-foreground font-normal">
-                  {user.email}
-                </DropdownMenuLabel>
-                {isAdmin && (
-                  <>
-                    <DropdownMenuLabel className="text-xs text-primary pt-0">Admin</DropdownMenuLabel>
-                    <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>
-                      <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
-                    </DropdownMenuItem>
-                  </>
-                )}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
-                  <LogOut className="h-4 w-4 mr-2" /> Sign out
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button className="rounded-full ring-2 ring-border focus:outline-none focus:ring-primary transition-all">
+                    <Avatar className="h-8 w-8">
+                      <AvatarImage src={user.user_metadata?.avatar_url} />
+                      <AvatarFallback className="bg-primary text-white text-xs font-bold">
+                        {initial}
+                      </AvatarFallback>
+                    </Avatar>
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-52 bg-card border-border">
+                  <DropdownMenuLabel className="truncate text-xs text-muted-foreground font-normal">
+                    {user.email}
+                  </DropdownMenuLabel>
+                  <DropdownMenuItem onClick={() => navigate({ to: "/profile" })}>
+                    <User className="h-4 w-4 mr-2" /> Profile
+                  </DropdownMenuItem>
+                  {isAdmin && (
+                    <>
+                      <DropdownMenuLabel className="text-xs text-primary pt-0">Admin</DropdownMenuLabel>
+                      <DropdownMenuItem onClick={() => navigate({ to: "/admin" })}>
+                        <LayoutDashboard className="h-4 w-4 mr-2" /> Dashboard
+                      </DropdownMenuItem>
+                    </>
+                  )}
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={signOut} className="text-destructive focus:text-destructive">
+                    <LogOut className="h-4 w-4 mr-2" /> Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </>
           ) : (
             <Link
               to="/auth"
